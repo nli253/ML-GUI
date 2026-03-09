@@ -24,6 +24,8 @@ function dtof_gui_runner_batch
     edtInFolder.Value  = '';
     edtOutFolder.Value = '';
     global edtPreppedFolder
+    global prediction
+    
     % ----------- Controls panel -----------
     ctl = uipanel(fig,'Title','Controls','Position',[10 280 1060 50]);
 
@@ -40,8 +42,8 @@ function dtof_gui_runner_batch
     uibutton(ctl,'Text','Run Inference (All MAT)','Position',[530 6 180 22],...
         'ButtonPushedFcn',@(~,~)runBatch());
 
-    uibutton(ctl,'Text','Open Output Folder','Position',[720 6 150 22],...
-        'ButtonPushedFcn',@(~,~)openOutFolder());
+    uibutton(ctl,'Text','Consolidate Output Folder','Position',[720 6 150 22],...
+        'ButtonPushedFcn',@(~,~)consolidateData());
 
     uibutton(ctl,'Text','Quit','Position',[880 6 80 22],...
         'ButtonPushedFcn',@(~,~)close(fig));
@@ -207,18 +209,6 @@ function dtof_gui_runner_batch
         end
     end
 
-    function openOutFolder()
-        outFold = strtrim(edtOutFolder.Value);
-        if ~isfolder(outFold)
-            uialert(fig,"Output folder does not exist yet.","Info"); return;
-        end
-        try
-            winopen(outFold);
-        catch
-            uialert(fig,"Could not open folder automatically. Copy the path from the GUI.","Info");
-        end
-    end
-
     function prepData()
         mkdir(strtrim(edtInFolder.Value),'ML 1input');
         edtPreppedFolder.Value = strcat(strtrim(edtInFolder.Value),'\ML 1input');
@@ -252,7 +242,23 @@ function dtof_gui_runner_batch
             output_file_name = fullfile(inFold, sprintf('DTOF_%d.mat', k));
             save(output_file_name,'tmp');
         end
-    end    
+    end
+
+    function consolidateData()
+        filePattern = fullfile(strtrim(edtOutFolder.Value),'*.mat');
+        fid = dir(filePattern);
+        [~,inx] = sort({fid.date});
+        fid = fid(inx);
+        
+        for n = 1:size(fid,1)
+            load([strtrim(edtOutFolder.Value),'\',fid(n).name])
+            DTOF(n).a =  prediction';
+        end
+        
+        delete(filePattern)
+        output_file_name = fullfile(edtOutFolder.Value, sprintf('DTOF_ML.mat'));
+        save(output_file_name,'DTOF') 
+    end
 
     % ----------- Small helpers -----------
     function [lab, edt, btn] = row(parent, label, y)
