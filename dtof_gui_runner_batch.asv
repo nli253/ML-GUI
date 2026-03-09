@@ -23,7 +23,7 @@ function dtof_gui_runner_batch
     edtModel.Value     = fullfile(pwd,'resendc.onnx');
     edtInFolder.Value  = '';
     edtOutFolder.Value = '';
-    global edtPreppedFolder
+
     % ----------- Controls panel -----------
     ctl = uipanel(fig,'Title','Controls','Position',[10 280 1060 50]);
 
@@ -220,38 +220,18 @@ function dtof_gui_runner_batch
     end
 
     function prepData()
-        mkdir(strtrim(edtInFolder.Value),'ML 1input');
-        edtPreppedFolder.Value = strcat(strtrim(edtInFolder.Value),'\ML 1input');
+        mkdir(strtrim(edtInFolder.Value),'ML input');
+        edtPreppedFolder.Value = strcat(strtrim(edtInFolder.Value),'\ML input');
         inFold = strtrim(edtPreppedFolder.Value);
         
-        filePattern = fullfile(strtrim(edtInFolder.Value),'*.txt');
+        filePattern = fullfile(edtPreppedFolder.Value,'*.txt');
         fid = dir(filePattern);
         [~,inx] = sort({fid.date});
         fid = fid(inx);
-        
-        dtofs_array = [];
+
         for i = 2:1:size(fid,1)-1
-            [dtofs_array,~] = LoadDTOFs([strtrim(edtInFolder.Value),'\',fid(i).name],[strtrim(edtInFolder.Value),'\',fid(1).name],dtofs_array,'SPAD');
-        end   
-        
-        ddtofs = zeros(size(dtofs_array));
-        for i = 1:size(dtofs_array,1)
-            ddtofs(i,:) = denoised(dtofs_array(i,:)); 
-        end
-        
-        rows_per_block = 104;
-        num_blocks = size(ddtofs,1) / rows_per_block;
-
-        for k = 1:num_blocks
-            row_start = (k-1)*rows_per_block + 1;
-            row_end   = k*rows_per_block;
-    
-            block = ddtofs(row_start:row_end, :);   % 104 × 820
-            tmp=block(1:2:end,:)-block(2:2:end,:);
-
-            output_file_name = fullfile(inFold, sprintf('DTOF_%d.mat', k));
-            save(output_file_name,'tmp');
-        end
+        [dtofs_array,~] = LoadDTOFs([edtPreppedFolder.Value,'\',fid(i).name],[edtPreppedFolder.Value,'\',fid(1).name],dtofs_array,'SPAD');
+        end        
     end    
 
     % ----------- Small helpers -----------
