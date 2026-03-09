@@ -1,0 +1,9 @@
+Here, I have attached all the matlab and python files for the GUI.
+This GUI can take the compressed differential measurements and predict the full DTOF. 
+There are some background code in python  so you need to have python install in the computer. I converted the pretrained weight to onnx format. 
+
+Animal measurement code will convert your measurement to differential measurement for the animal data. This will be the input file and from GUI you need to define an output file where the predicted DTOF will be saved automatically. 
+
+Notes added (Natalie Li 2026-03-06)
+- requires you to change the python.exe file path to your local python installation
+- requires installation of scipy, onnxruntime modules
