@@ -252,7 +252,7 @@ function dtof_gui_runner_batch
         
         for n = 1:size(fid,1)
             load([strtrim(edtOutFolder.Value),'\',fid(n).name])
-            DTOF(n).a =  prediction';
+            DTOF(n).a =  double(fliplr(prediction'));
         end
         
         delete(filePattern)
